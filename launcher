@@ -1,0 +1,66 @@
+#!/usr/bin/python
+
+import copy
+import os
+import plistlib
+import shlex
+import string
+import subprocess
+import sys
+
+def get_java_home(ver=None):
+	cmd = ["/usr/libexec/java_home"]
+	if ver is not None:
+		cmd.extend(["-v", ver])
+	p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+	s = p.communicate()
+	if 0 != p.returncode:
+		raise OSError("Requested version of java was not found")
+	return s[0].splitlines()[0]
+
+def expand_path(path):
+	return os.path.expandvars(path)
+
+def main(argv):
+	java_env = copy.copy(os.environ)
+
+	package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+	contents_dir = os.path.join(package_dir, "Contents")
+	resources_dir = os.path.join(contents_dir, "Resources")
+	bin_dir = os.path.join(package_dir, "bin")
+	os.environ["APP_PACKAGE"] = package_dir
+
+	plist_root = plistlib.readPlist(os.path.join(contents_dir, "Info.plist.original"))
+	plist_name = plist_root["CFBundleName"]
+	plist_icon = plist_root["CFBundleIconFile"]
+	plist_java = plist_root["Java"]
+	plist_ver = plist_java["JVMVersion"]
+	plist_classpath = plist_java["ClassPath"]
+	plist_workingdir = plist_java["WorkingDirectory"]
+	plist_vmoptions = plist_java["VMOptions"]
+	plist_mainclass = plist_java["MainClass"]
+
+	java_home = get_java_home(plist_ver)
+	java_name = plist_name
+	java_icon = os.path.join(resources_dir, plist_icon)
+	java_classpath = expand_path(plist_classpath) + ":" + os.path.join(java_home, "lib/*")
+	java_workingdir = expand_path(plist_workingdir)
+	java_vmoptions = shlex.split(plist_vmoptions)
+	java_mainclass = plist_mainclass
+
+	java = os.path.join(java_home, "bin/java")
+	java_env["JAVA_HOME"] = java_home
+	java_args = [java]
+	java_args.append("-Xdock:name=" + java_name)
+	java_args.append("-Xdock:icon=" + java_icon)
+	java_args.extend(java_vmoptions)
+	java_args.extend(["-classpath", java_classpath])
+	java_args.append(java_mainclass)
+
+	os.chdir(java_workingdir)
+	os.execve(java, java_args, java_env)
+	# execve failed if we are here
+	return 1
+
+if __name__ == "__main__":
+	sys.exit(main(sys.argv))
