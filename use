@@ -33,6 +33,11 @@ def launcher_apply(app_dir):
 	plist_root["CFBundleExecutable"] = launcher_name
 	plistlib.writePlist(plist_root, plist_file)
 	os.chmod(plist_file, plist_file_mode)
+
+	# Mac OS caches some bundle info, need to touch to force update
+	os.utime(contents_dir, None)
+	os.utime(macos_dir, None)
+	os.utime(app_dir, None)
 	return 0
 
 def launcher_undo(app_dir):
@@ -50,6 +55,11 @@ def launcher_undo(app_dir):
 	os.chmod(plist_file, plist_file_mode)
 	os.remove(plist_original_file)
 	os.remove(launcher_file)
+
+	# Mac OS caches some bundle info, need to touch to force update
+	os.utime(contents_dir, None)
+	os.utime(macos_dir, None)
+	os.utime(app_dir, None)
 	return 0
 
 # use --install 
