@@ -25,6 +25,12 @@ def get_java_home(ver=None):
 		raise OSError("Requested version of java was not found")
 	return s[0].splitlines()[0]
 
+def get_java_properties(plist_props):
+	props = []
+	for key in plist_props:
+		props.append("-D%s=%s" % (key, plist_props[key]))
+	return props
+
 def expand_path(path):
 	return os.path.expandvars(path)
 
@@ -45,6 +51,7 @@ def launch():
 	plist_classpath = plist_java["ClassPath"]
 	plist_workingdir = plist_java["WorkingDirectory"]
 	plist_vmoptions = plist_java["VMOptions"]
+	plist_properties = plist_java["Properties"]
 	plist_mainclass = plist_java["MainClass"]
 
 	java_home = get_java_home(plist_ver)
@@ -53,6 +60,7 @@ def launch():
 	java_classpath = expand_path(plist_classpath) + ":" + os.path.join(java_home, "lib/*")
 	java_workingdir = expand_path(plist_workingdir)
 	java_vmoptions = shlex.split(plist_vmoptions)
+	java_properties = get_java_properties(plist_properties)
 	java_mainclass = plist_mainclass
 
 	java = os.path.join(java_home, "bin/java")
@@ -61,6 +69,7 @@ def launch():
 	java_args.append("-Xdock:name=" + java_name)
 	java_args.append("-Xdock:icon=" + java_icon)
 	java_args.extend(java_vmoptions)
+	java_args.extend(java_properties)
 	java_args.extend(["-classpath", java_classpath])
 	java_args.append(java_mainclass)
 
