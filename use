@@ -62,7 +62,6 @@ def launcher_undo(app_dir):
 	os.utime(app_dir, None)
 	return 0
 
-# use --install 
 def main(argv):
 	usage = "usage: %prog [options] app_bundle"
 	parser = optparse.OptionParser(usage=usage)
