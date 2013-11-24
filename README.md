@@ -21,9 +21,13 @@ $ ./use --apply "/Applications/IntelliJ IDEA 12 CE.app"
 ```
 
 This command will:
+
 1.  Backup original Info.plist to Info.plist.original
+
 2.  Copy launcher to Bundle.app/Contents/MacOS/mac-java-launcher
+
 3.  Remove "Java" section from Info.plist
+
 4.  Set "CFBundleExecutable" in Info.plist to mac-java-launcher
 
 **mac-java-launcher** uses "Java" section from Info.plist.original when
