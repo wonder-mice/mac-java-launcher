@@ -21,14 +21,14 @@ $ ./use --apply "/Applications/IntelliJ IDEA 12 CE.app"
 ```
 
 This command will:
-1. Backup original Info.plist to Info.plist.original
-2. Copy launcher to Bundle.app/Contents/MacOS/mac-java-launcher
-3. Remove "Java" section from Info.plist
-4. Set "CFBundleExecutable" in Info.plist to mac-java-launcher
+1.  Backup original Info.plist to Info.plist.original
+2.  Copy launcher to Bundle.app/Contents/MacOS/mac-java-launcher
+3.  Remove "Java" section from Info.plist
+4.  Set "CFBundleExecutable" in Info.plist to mac-java-launcher
 
 **mac-java-launcher** uses "Java" section from Info.plist.original when
 launching application. If you want, for example, change "JVMVersion" from
-"1.6*" to "1.7*" you can do it in Info.plist.original.
+"1.6\*" to "1.7\*" you can do it in Info.plist.original.
 
 Also, it is easy to restore original launcher:
 ```bash
