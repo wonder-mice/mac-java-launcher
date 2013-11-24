@@ -1,0 +1,84 @@
+#!/usr/bin/python
+
+import optparse
+import os
+import plistlib
+import shutil
+import sys
+
+def get_launcher_name():
+	return "mac-java-launcher"
+
+def launcher_apply(app_dir):
+	launcher_name = get_launcher_name()
+
+	contents_dir = os.path.join(app_dir, "Contents")
+	macos_dir = os.path.join(contents_dir, "MacOS")
+	plist_file = os.path.join(contents_dir, "Info.plist")
+	plist_original_file = os.path.join(contents_dir, "Info.plist.original")
+	launcher_file = os.path.join(macos_dir, launcher_name)
+	launcher_stub_file = os.path.join(os.path.dirname(__file__), "launcher")
+
+	plist_root = plistlib.readPlist(plist_file)
+	if "Java" not in plist_root:
+		raise OSError("Not a java application")
+	plist_file_mode = os.stat(plist_file).st_mode
+	launcher_file_mode = os.stat(os.path.join(macos_dir, plist_root["CFBundleExecutable"])).st_mode
+
+	shutil.copyfile(plist_file, plist_original_file)
+	shutil.copyfile(launcher_stub_file, launcher_file)
+	os.chmod(launcher_file, launcher_file_mode)
+
+	plist_root.pop("Java", None)
+	plist_root["CFBundleExecutable"] = launcher_name
+	plistlib.writePlist(plist_root, plist_file)
+	os.chmod(plist_file, plist_file_mode)
+	return 0
+
+def launcher_undo(app_dir):
+	launcher_name = get_launcher_name()
+
+	contents_dir = os.path.join(app_dir, "Contents")
+	macos_dir = os.path.join(contents_dir, "MacOS")
+	plist_file = os.path.join(contents_dir, "Info.plist")
+	plist_original_file = os.path.join(contents_dir, "Info.plist.original")
+	launcher_file = os.path.join(macos_dir, launcher_name)
+
+	plist_file_mode = os.stat(plist_file).st_mode
+
+	shutil.copyfile(plist_original_file, plist_file)
+	os.chmod(plist_file, plist_file_mode)
+	os.remove(plist_original_file)
+	os.remove(launcher_file)
+	return 0
+
+# use --install 
+def main(argv):
+	usage = "usage: %prog [options] app_bundle"
+	parser = optparse.OptionParser(usage=usage)
+	parser.add_option("-a", "--apply", dest="apply", action="store_true",
+					  help="set launcher for specified java bundled application")
+	parser.add_option("-u", "--undo", dest="undo", action="store_true",
+					  help="undo changes, revert app to original state")
+	(options, args) = parser.parse_args(argv[1:])
+	if 0 == len(args) :
+		parser.error("path to java application bundle was not specified")
+	if options.apply and options.undo:
+		parser.error("choose apply or undo - you can not have both")
+
+	try:
+		if options.apply:
+			for app_dir in args:
+				print "applying launcher to \"%s\"" % (app_dir)
+				launcher_apply(app_dir)
+		if options.undo:
+			for app_dir in args:
+				print "undoing launcher to \"%s\"" % (app_dir)
+				launcher_undo(app_dir)
+	except Exception, e:
+		print "Error: %s" % (str(e))
+		return 1
+	return 0
+
+if __name__ == "__main__":
+	sys.exit(main(sys.argv))
