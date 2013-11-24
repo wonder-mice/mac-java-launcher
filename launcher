@@ -7,6 +7,13 @@ import shlex
 import string
 import subprocess
 import sys
+import Tkinter
+import tkMessageBox
+
+def show_error(message):
+	window = Tkinter.Tk()
+	window.wm_withdraw()
+	tkMessageBox.showerror(title="Error", message=message, icon=tkMessageBox.ERROR)
 
 def get_java_home(ver=None):
 	cmd = ["/usr/libexec/java_home"]
@@ -21,7 +28,7 @@ def get_java_home(ver=None):
 def expand_path(path):
 	return os.path.expandvars(path)
 
-def main(argv):
+def launch():
 	java_env = copy.copy(os.environ)
 
 	package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
@@ -59,7 +66,13 @@ def main(argv):
 
 	os.chdir(java_workingdir)
 	os.execve(java, java_args, java_env)
-	# execve failed if we are here
+	# must not get here
+
+def main(argv):
+	try:
+		return launch()
+	except Exception, e:
+		show_error(str(e))
 	return 1
 
 if __name__ == "__main__":
