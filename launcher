@@ -28,7 +28,8 @@ def get_java_home(ver=None):
 def get_java_properties(plist_props):
 	props = []
 	for key in plist_props:
-		props.append("-D%s=%s" % (key, plist_props[key]))
+		value = os.path.expandvars(plist_props[key])
+		props.append("-D%s=%s" % (key, value))
 	return props
 
 def expand_path(path):
