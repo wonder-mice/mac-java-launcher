@@ -25,6 +25,13 @@ def get_java_home(ver=None):
 		raise OSError("Requested version of java was not found")
 	return s[0].splitlines()[0]
 
+def get_java_options(plist_root):
+	for key in ["Java", "JVMOptions"]:
+		plist_java = plist_root.get(key, None)
+		if plist_java is not None:
+			return plist_java
+	raise OSError("Not a java application")
+
 def get_java_properties(plist_props):
 	props = []
 	for key in plist_props:
@@ -47,7 +54,7 @@ def launch():
 	plist_root = plistlib.readPlist(os.path.join(contents_dir, "Info.plist.original"))
 	plist_name = plist_root["CFBundleName"]
 	plist_icon = plist_root["CFBundleIconFile"]
-	plist_java = plist_root["Java"]
+	plist_java = get_java_options(plist_root)
 	plist_ver = plist_java["JVMVersion"]
 	plist_classpath = plist_java["ClassPath"]
 	plist_workingdir = plist_java["WorkingDirectory"]

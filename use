@@ -9,6 +9,12 @@ import sys
 def get_launcher_name():
 	return "mac-java-launcher"
 
+def get_java_options_key(plist_root):
+	for key in ["Java", "JVMOptions"]:
+		if key in plist_root:
+			return key
+	raise OSError("Not a java application")
+
 def launcher_apply(app_dir):
 	launcher_name = get_launcher_name()
 
@@ -20,8 +26,7 @@ def launcher_apply(app_dir):
 	launcher_stub_file = os.path.join(os.path.dirname(__file__), "launcher")
 
 	plist_root = plistlib.readPlist(plist_file)
-	if "Java" not in plist_root:
-		raise OSError("Not a java application")
+	plist_java_key = get_java_options_key(plist_root)
 	plist_file_mode = os.stat(plist_file).st_mode
 	launcher_file_mode = os.stat(os.path.join(macos_dir, plist_root["CFBundleExecutable"])).st_mode
 
@@ -29,7 +34,7 @@ def launcher_apply(app_dir):
 	shutil.copyfile(launcher_stub_file, launcher_file)
 	os.chmod(launcher_file, launcher_file_mode)
 
-	plist_root.pop("Java", None)
+	plist_root.pop(plist_java_key, None)
 	plist_root["CFBundleExecutable"] = launcher_name
 	plistlib.writePlist(plist_root, plist_file)
 	os.chmod(plist_file, plist_file_mode)
