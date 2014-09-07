@@ -24,7 +24,6 @@ This command will:
 
 Also, it is easy to restore original launcher:
 ```bash
-$ cd mac-java-launcher.git
 $ ./use --undo "/Applications/IntelliJ IDEA 12 CE.app" --java-version "1.6*"
 ```
 
