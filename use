@@ -15,6 +15,18 @@ def get_java_options_key(plist_root):
 			return key
 	raise OSError("Not a java application")
 
+def set_java_version(app_dir, version):
+	contents_dir = os.path.join(app_dir, "Contents")
+	macos_dir = os.path.join(contents_dir, "MacOS")
+	plist_file = os.path.join(contents_dir, "Info.plist.original")
+	if not os.path.isfile(plist_file):
+		plist_file = os.path.join(contents_dir, "Info.plist")
+	plist_root = plistlib.readPlist(plist_file)
+	plist_java_key = get_java_options_key(plist_root)
+	plist_java = plist_root[plist_java_key]
+	plist_java["JVMVersion"] = version
+	plistlib.writePlist(plist_root, plist_file)
+
 def launcher_apply(app_dir):
 	launcher_name = get_launcher_name()
 
@@ -74,6 +86,9 @@ def main(argv):
 					  help="set launcher for specified java bundled application")
 	parser.add_option("-u", "--undo", dest="undo", action="store_true",
 					  help="undo changes, revert app to original state")
+	parser.add_option("-j", "--java-version", dest="java_version", metavar="VERSION",
+					  type="string", default=None,
+					  help="set java version to be used by that application")
 	(options, args) = parser.parse_args(argv[1:])
 	if 0 == len(args) :
 		parser.error("path to java application bundle was not specified")
@@ -81,12 +96,14 @@ def main(argv):
 		parser.error("choose apply or undo - you can not have both")
 
 	try:
-		if options.apply:
-			for app_dir in args:
+		for app_dir in args:
+			if options.java_version is not None:
+				print "setting java version \"%s\" for \"%s\"" % (options.java_version, app_dir)
+				set_java_version(app_dir, options.java_version)
+			if options.apply:
 				print "applying launcher to \"%s\"" % (app_dir)
 				launcher_apply(app_dir)
-		if options.undo:
-			for app_dir in args:
+			if options.undo:
 				print "undoing launcher to \"%s\"" % (app_dir)
 				launcher_undo(app_dir)
 	except Exception, e:
