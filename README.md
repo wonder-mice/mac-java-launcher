@@ -36,7 +36,7 @@ About
 Mac OS launcher for bundled java applications requires jdk 1.6 to be installed.
 And even if application itself requires only jdk 1.7 you will still need to
 install jdk 1.6 - just to satisfy application launcher. You can see this
-issue, for example, with IntelliJ IDEA 12 and IntelliJ IDEA 13 after changing
+issue, for example, with IntelliJ IDEA or yEd after changing
 "JVMVersion" in Info.plist to "1.7\*" (not the case for newer releases).
 
 **mac-java-launcher** replaces launcher shiped with the application and requires
