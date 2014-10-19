@@ -13,15 +13,15 @@ $ ./use --apply "/Applications/IntelliJ IDEA 12 CE.app" --java-version "1.6+"
 
 This command will:
 
-1.  Backup original _Info.plist_ to _Info.plist.original_
+1.  Backup original `Info.plist` to `Info.plist.original`
 
-2.  Copy _launcher_ script to _Bundle.app/Contents/MacOS/mac-java-launcher_
+2.  Copy `launcher` script to `AppBundle.app/Contents/MacOS/mac-java-launcher`
 
-3.  Remove "Java" (or "JVMOptions")  section from _Info.plist_
+3.  Remove "Java" (or "JVMOptions")  section from `Info.plist`
 
-4.  Set "CFBundleExecutable" in _Info.plist_ to _mac-java-launcher_
+4.  Set "CFBundleExecutable" in `Info.plist` to `mac-java-launcher`
 
-5.  Set "JVMVersion" in _Info.plist.original_ to `1.6+`
+5.  Set "JVMVersion" in `Info.plist.original` to `1.6+`
 
 Also, it is easy to restore original launcher:
 
@@ -31,6 +31,27 @@ $ ./use --undo "/Applications/IntelliJ IDEA 12 CE.app" --java-version "1.6*"
 
 This command will revert previous one. "--java-version" is optional in both cases,
 however "--undo" doesn't revert java version change by itself.
+
+Changing Only the JDK Version
+=============================
+
+Many newer `.app` bundles do not require the `launcher` script to work, such as
+`IntelliJ IDEA 13.x`. However, these applications may still require an earlier
+version of Java to be installed (e.g., JDK 1.6).
+
+In such cases, the `Info.plist` needs to have its `JVMVersion` updated. IntelliJ
+IDEA 13.x has a value of `1.6*`, which _requires_ a release of JDK 1.6 to be
+installed. However, changing it to `1.6+` allows it to work with JDK 1.6 and
+newer.
+
+```bash
+$ ./use --java-version "1.6+" "/Applications/IntelliJ IDEA 13.app"
+```
+
+This command will:
+
+1. Change the `JVMVersion` to `1.6+` from the default `1.6*` and allow IntelliJ
+IDEA 13 to work JDK 1.6, JDK 1.7, or JDK 1.8.
 
 About
 =====
@@ -52,7 +73,7 @@ and `mac-java-launcher` requires no JDK by itself (it will replace launcher only
 for single application specified in command line argument). After that, only the
 JDK version actually required by application must be installed.
 
-`mac-java-launcher` uses the "Java" section from _Info.plist.original_ when
+`mac-java-launcher` uses the "Java" section from `Info.plist.original` when
 launching application. If you want, for example, change "JVMVersion" from
-`1.6*` to `1.6+` you can do it in _Info.plist.original_. Also, that can be
+`1.6*` to `1.6+` you can do it in `Info.plist.original`. Also, that can be
 done with "--java-version" option.
